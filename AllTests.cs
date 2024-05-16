@@ -4,6 +4,7 @@ using Microsoft.Playwright;
 [TestFixture]
 public class PlaywrightDemoTest
 {
+     // foobar  
     private IPlaywright _playwright;
     private IBrowser _browser;
     private IBrowserContext _context;
@@ -13,12 +14,6 @@ public class PlaywrightDemoTest
     public async Task SetUp()
     {
         _playwright = await Playwright.CreateAsync();
-        _browser = await _playwright.Firefox.LaunchAsync(new BrowserTypeLaunchOptions
-        {
-            Headless = false
-        });
-        _context = await _browser.NewContextAsync();
-        _page = await _context.NewPageAsync();
     }
 
     [TearDown]
@@ -29,9 +24,24 @@ public class PlaywrightDemoTest
         _playwright.Dispose();
     }
 
-    [Test]
-    public async Task MyTest()
+    [TestCase("chromium")]
+    [TestCase("firefox")]
+    [TestCase("webkit")]
+    public async Task MyTest(string browserType)
     {
+        // Launch the specified browser
+        _browser = browserType switch
+        {
+            "chromium" => await _playwright.Chromium.LaunchAsync(new BrowserTypeLaunchOptions { Headless = true }),
+            "firefox" => await _playwright.Firefox.LaunchAsync(new BrowserTypeLaunchOptions { Headless = true }),
+            "webkit" => await _playwright.Webkit.LaunchAsync(new BrowserTypeLaunchOptions { Headless = true }),
+            _ => throw new ArgumentException("Invalid browser type", nameof(browserType))
+        };
+        _context = await _browser.NewContextAsync();
+        _page = await _context.NewPageAsync();
+
+        _context.ClearCookiesAsync();
+
         await _page.GotoAsync("https://demo.nopcommerce.com/");
         await _page.GetByRole(AriaRole.Link, new() { Name = "Computers" }).ClickAsync();
         await _page.GetByRole(AriaRole.Heading, new() { Name = "Notebooks" }).GetByRole(AriaRole.Link).ClickAsync();

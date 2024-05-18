@@ -1,10 +1,16 @@
 using Microsoft.Playwright;
+using RestSharp.Authenticators;
+using RestSharp;
+using System.Threading;
+using RestSharp;
+using RestSharp.Authenticators;
+using NUnit.Framework.Interfaces;
 
-[Parallelizable(ParallelScope.Self)]
+//[Parallelizable(ParallelScope.All)]
 [TestFixture]
 public class PlaywrightDemoTest
 {
-     // foobar  
+
     private IPlaywright _playwright;
     private IBrowser _browser;
     private IBrowserContext _context;
@@ -27,14 +33,14 @@ public class PlaywrightDemoTest
     [TestCase("chromium")]
     [TestCase("firefox")]
     [TestCase("webkit")]
-    public async Task MyTest(string browserType)
+    public async Task MyTest (string browserType)
     {
         // Launch the specified browser
         _browser = browserType switch
         {
-            "chromium" => await _playwright.Chromium.LaunchAsync(new BrowserTypeLaunchOptions { Headless = true }),
-            "firefox" => await _playwright.Firefox.LaunchAsync(new BrowserTypeLaunchOptions { Headless = true }),
-            "webkit" => await _playwright.Webkit.LaunchAsync(new BrowserTypeLaunchOptions { Headless = true }),
+            "chromium" => await _playwright.Chromium.LaunchAsync(new BrowserTypeLaunchOptions { Headless = false }),
+            "firefox" => await _playwright.Firefox.LaunchAsync(new BrowserTypeLaunchOptions { Headless = false}),
+            "webkit" => await _playwright.Webkit.LaunchAsync(new BrowserTypeLaunchOptions { Headless = false}),
             _ => throw new ArgumentException("Invalid browser type", nameof(browserType))
         };
         _context = await _browser.NewContextAsync();
@@ -57,7 +63,7 @@ public class PlaywrightDemoTest
         var termsOfServiceVisible = await _page.GetByText("Terms of service", new() { Exact = true }).IsVisibleAsync();
         Assert.IsTrue(termsOfServiceVisible);
 
-        // Final (dummy) assertion
-        Assert.AreEqual(0, 0);
+
     }
+
 }
